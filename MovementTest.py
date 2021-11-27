@@ -30,6 +30,7 @@ while run:
     
     for event in pg.event.get():
         if event.type == pg.QUIT: sys - exit()
+        """Obtener Input"""
         if event.type == pg.KEYDOWN:
             try:
                 key = chr(event.key)             
@@ -37,23 +38,23 @@ while run:
                     position[0] += movementDict[key][0] * amount
                     position[1] += movementDict[key][1] * amount
                     prevPositions.clear();
-                    for part in snake:
+                    prevPositions.append(position)
+                    snakeAux=snake[:len(snake)] #todos los elementos menos el último
+                    for part in snakeAux:
                         prevPositions.append([part.rect.left,part.rect.top])
             except ValueError:
                 print('input no valido') #por ahora esto se queda como try catch para no dar error. hay que incluir soporte para las flechas, que no tienen chr
+    """prevPositions es una lista que guarda la NUEVA posición a la que deberán moverse todas las partes, la cual es la que ocupaba la anterior antes excepto head, que tomará
+    de nueva posición el input. Importante separar el obtener las posiciones del renderizado."""
 
+    """Renderizado"""
     screen.fill((0,0,0))
-    """Creo que el problema radica en que estoy intentando actualizar las posiciones y sprites al mismo tiempo, cuando realmente deberían estar separados.
-    Posibilidad: dejar este for para actualizar SOLO los sprites y antes de eso, en el TRY, hacer una función que actualice todas las posiciones. El comentario verde ahí
-    dentro muestra como tomar la posición anterior"""
     count = 0
+    
     if len(prevPositions) > 0:
         for part in snake:
-            if head==part:
-                part.move_part(screen,position)
-            else:                               
-                part.move_part(screen,prevPositions[count])
-                count+=1      
+            part.move_part(screen,prevPositions[count])
+            count+=1      
     else:
         for part in snake:
             pg.draw.rect(screen,(255,0,0),part.rect)
