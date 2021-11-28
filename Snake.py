@@ -28,7 +28,7 @@ snake=[head,body,body1,body2,tail]
 canMove=False
 
 while run:
-    """TO DO: que la serpiente no pueda pasar por su cuerpo. Objetos consumables. Osea vamos a tener que programar interacción con otros."""
+    """TO DO:Objetos consumables. Osea vamos a tener que programar interacción con otros."""
     for event in pg.event.get():
         if event.type == pg.QUIT: sys - exit()
         """Obtener Input"""
