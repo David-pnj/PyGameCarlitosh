@@ -2,6 +2,11 @@ import sys, pygame as pg
 
 pg.init()
 
+class Consumable():
+    def __init__(self,rect,points):
+        self.rect=rect
+        self.points=points
+
 class SnakePart():
     def __init__(self,rect):
         self.rect=rect
@@ -22,13 +27,15 @@ body= SnakePart(pg.Rect(position[0]-30,position[1],30,30))
 body1= SnakePart(pg.Rect(position[0]-60,position[1],30,30))
 body2= SnakePart(pg.Rect(position[0]-90,position[1],30,30))
 tail= SnakePart(pg.Rect(position[0]-120,position[1],30,30))
+
+consum1=Consumable(pg.Rect(290,50,30,30),1)
+drawConsum=True
 prevPositions=[]
 
 snake=[head,body,body1,body2,tail]
 canMove=False
 
 while run:
-    """TO DO: que la serpiente no pueda pasar por su cuerpo. Objetos consumables. Osea vamos a tener que programar interacción con otros."""
     for event in pg.event.get():
         if event.type == pg.QUIT: sys - exit()
         """Obtener Input"""
@@ -42,6 +49,13 @@ while run:
                     prevPositions.clear()            
                     prevPositions.append(position)
                     testRect=pg.Rect(position[0],position[1],30,30)
+                    """Si toca un consumable, añade 1 pieza a la serpiente. Cambiarlo para que la cantidad de piezas añadidas dependa del atributo points de la clase Consumable"""
+                    if drawConsum:
+                        if testRect.colliderect(consum1.rect):                      
+                            newPart= SnakePart(pg.Rect(body.rect.left,body.rect.top,30,30))
+                            snake.append(newPart)
+                            drawConsum=False
+                            
                     snakeAux=snake[:len(snake)] #todos los elementos menos el último
                     for part in snakeAux:
                         """Malo de narices pero no he encontrado forma de chequear si puede hacer un solo heck de 'si hay un objeto x en esta posicion', tengo que hacerlo en un for
@@ -59,12 +73,15 @@ while run:
     """Renderizado"""
     screen.fill((0,0,0))
     count = 0
-
-    if canMove:
+    if drawConsum:
+        pg.draw.rect(screen,(0,0,255),consum1.rect)
+    if canMove:        
         for part in snake:
             part.move_part(screen,prevPositions[count])
-            count+=1      
+            count+=1                   
     else:
         for part in snake:
             pg.draw.rect(screen,(255,0,0),part.rect)
+        
+    
     pg.display.flip()
