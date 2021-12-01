@@ -1,40 +1,58 @@
-import sys, pygame as pg
+import sys,random, pygame as pg
 
 pg.init()
 
+"""TO DO: Consumable que aumenta la puntuación de los azules, tener varios azules (opcional) y sprites/sonidos para la serpiente y consumables"""
 class Consumable():
     def __init__(self,rect,points):
         self.rect=rect
         self.points=points
+    def move_consumable(self,screen,position):
+        self.rect=pg.Rect(position[0],position[1],25,25)
+        pg.draw.rect(screen,(0,0,255),self.rect)
 
 class SnakePart():
     def __init__(self,rect):
         self.rect=rect
     def move_part(self,screen,position):
-        self.rect=pg.Rect(position[0],position[1],30,30)
+        self.rect=pg.Rect(position[0],position[1],25,25)
         pg.draw.rect(screen,(255,0,0),self.rect)
         
 
     
 screen = pg.display.set_mode((720,720))
 position = [200,50]
-amount = 6
+amount = 5
 movementDict = {"w" : (0,-5),"a" : (-5,0),"s" : (0,5),"d" : (5,0)}
 run = True
 
-head= SnakePart(pg.Rect(position[0],position[1],30,30)) 
-body= SnakePart(pg.Rect(position[0]-30,position[1],30,30))
-body1= SnakePart(pg.Rect(position[0]-60,position[1],30,30))
-body2= SnakePart(pg.Rect(position[0]-90,position[1],30,30))
-tail= SnakePart(pg.Rect(position[0]-120,position[1],30,30))
+head= SnakePart(pg.Rect(position[0],position[1],25,25)) 
+body= SnakePart(pg.Rect(position[0]-25,position[1],25,25))
+body1= SnakePart(pg.Rect(position[0]-50,position[1],25,25))
+body2= SnakePart(pg.Rect(position[0]-75,position[1],25,25))
+tail= SnakePart(pg.Rect(position[0]-100,position[1],25,25))
 
-consum1=Consumable(pg.Rect(290,50,30,30),1)
-drawConsum=True
+consum1Position=[225,100]
+consum1=Consumable(pg.Rect(consum1Position[0],consum1Position[1],25,25),1)
+"""Añadir un consumable verde que suba el valor del consumable azul por 2"""
+
 prevPositions=[]
 
 snake=[head,body,body1,body2,tail]
 canMove=False
-
+def calculate_pos_consum():
+    x=random.randint(-15,15)*25
+    y=random.randint(-15,15)*25
+    """se sale algunas veces y por consecuencia aparece demasiado en el borde. Probar las tecnicas de try catch que vienen en las diapos de clase a ver si es mejor."""
+    if x < 0:
+        x= 0
+    if x > 720: 
+        x= 720
+    if y < 0:
+        y = 0
+    if y > 720:
+        y = 720
+    return [x,y]
 while run:
     for event in pg.event.get():
         if event.type == pg.QUIT: sys - exit()
@@ -48,13 +66,14 @@ while run:
                     canMove=True
                     prevPositions.clear()            
                     prevPositions.append(position)
-                    testRect=pg.Rect(position[0],position[1],30,30)
+                    testRect=pg.Rect(position[0],position[1],25,25)
                     """Si toca un consumable, añade 1 pieza a la serpiente. Cambiarlo para que la cantidad de piezas añadidas dependa del atributo points de la clase Consumable"""
-                    if drawConsum:
-                        if testRect.colliderect(consum1.rect):                      
-                            newPart= SnakePart(pg.Rect(body.rect.left,body.rect.top,30,30))
-                            snake.append(newPart)
-                            drawConsum=False
+                    if testRect.colliderect(consum1.rect):                      
+                        newPart= SnakePart(pg.Rect(body.rect.left,body.rect.top,25,25))
+                        snake.append(newPart)
+                        consum1Position=calculate_pos_consum()
+                        print(consum1Position)
+                        
                             
                     snakeAux=snake[:len(snake)] #todos los elementos menos el último
                     for part in snakeAux:
@@ -73,8 +92,7 @@ while run:
     """Renderizado"""
     screen.fill((0,0,0))
     count = 0
-    if drawConsum:
-        pg.draw.rect(screen,(0,0,255),consum1.rect)
+    consum1.move_consumable(screen,consum1Position)
     if canMove:        
         for part in snake:
             part.move_part(screen,prevPositions[count])
