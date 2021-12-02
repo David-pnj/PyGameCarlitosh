@@ -2,7 +2,9 @@ import sys,random, pygame as pg
 
 pg.init()
 
-"""TO DO: Consumable que aumenta la puntuación de los azules, tener varios azules (opcional) y sprites/sonidos para la serpiente y consumables"""
+"""TO DO: Consumable que aumenta la puntuación de los azules, tener varios azules y sonidos para la serpiente y consumables. Also se debería añadir una clase base de la que
+hereden consumable y snakepart, para no repetir la función move y añadir el parámetro 'Color'. Queda bastante redundante si no."""
+
 class Consumable():
     def __init__(self,rect,points):
         self.rect=rect
@@ -43,7 +45,7 @@ canMove=False
 def calculate_pos_consum():
     x=random.randint(-15,15)*25
     y=random.randint(-15,15)*25
-    """se sale algunas veces y por consecuencia aparece demasiado en el borde. Probar las tecnicas de try catch que vienen en las diapos de clase a ver si es mejor."""
+    """Bastante horrible, hay que cambiar esto inmediatamente."""
     if x < 0:
         x= 0
     if x > 720: 
@@ -77,15 +79,14 @@ while run:
                             
                     snakeAux=snake[:len(snake)] #todos los elementos menos el último
                     for part in snakeAux:
-                        """Malo de narices pero no he encontrado forma de chequear si puede hacer un solo heck de 'si hay un objeto x en esta posicion', tengo que hacerlo en un for
-                        y ya que está este aquí obligatorio, al menos aprovecho este en vez de crear otro."""
+                        """posiblemente pueda sustituirse esto con el collidelist. Echarle un ojo en la doc"""
                         if testRect.colliderect(part.rect): 
                             canMove=False     
                             break
                         prevPositions.append([part.rect.left,part.rect.top])
                     
             except ValueError:
-                print('input no valido') #por ahora esto se queda como try catch para no dar error. hay que incluir soporte para las flechas, que no tienen chr
+                print('input no valido')
     """prevPositions es una lista que guarda la NUEVA posición a la que deberán moverse todas las partes, la cual es la que ocupaba la anterior antes excepto head, que tomará
     de nueva posición el input. Importante separar el obtener las posiciones del renderizado."""
 
