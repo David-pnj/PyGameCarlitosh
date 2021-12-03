@@ -16,6 +16,9 @@ class Consumable(Entity):
     def __init__(self, rect, points):
         self.rect = rect
         self.points = points
+    def consumableEffect(self,list,body):
+        newPart = SnakePart(pg.Rect(body.rect.left, body.rect.top, 25, 25))
+        list.append(newPart)
 
 
 class SnakePart(Entity):
@@ -27,6 +30,19 @@ class Wall(Entity):
     def __init__(self, rect):
         super().__init__(rect)
 
+def calculate_pos_consum():
+    x = random.randint(-15, 15) * 25
+    y = random.randint(-15, 15) * 25
+    """se sale algunas veces y por consecuencia aparece demasiado en el borde. Probar las tecnicas de try catch que vienen en las diapos de clase a ver si es mejor."""
+    if x < 0:
+        x = 25
+    if x > 720:
+        x = 720
+    if y < 0:
+        y = 25
+    if y > 720:
+        y = 720
+    return [x, y]
 
 RED = (255, 0, 0)
 GREY = (128, 128, 128)
@@ -50,6 +66,8 @@ wall4 = Wall(pg.Rect(720, 0, 25, 720))
 walls = [wall1, wall2, wall3, wall4]
 consum1Position = [225, 100]
 consum1 = Consumable(pg.Rect(consum1Position[0], consum1Position[1], 25, 25), 1)
+consum2 = Consumable(pg.Rect(consum1Position[0]+120,consum1Position[1]+60,25,25),1)
+consumables=[consum1,consum2]
 """Añadir un consumable verde que suba el valor del consumable azul por 2"""
 
 
@@ -89,11 +107,18 @@ while run:
                     prevPositions.append(position)
                     testRect = pg.Rect(position[0], position[1], 25, 25)
                     """Si toca un consumable, añade 1 pieza a la serpiente. Cambiarlo para que la cantidad de piezas añadidas dependa del atributo points de la clase Consumable"""
+                    collidedConsum=testRect.collidelist(consumables)
+                    if collidedConsum != -1:
+                        consumables[collidedConsum].consumableEffect(snake,body)
+                        consum1Position= calculate_pos_consum()
+                        consumables[collidedConsum].rect.left=consum1Position[0] #cambia la pos del consumable tomado
+                        consumables[collidedConsum].rect.top=consum1Position[1]
+
                     if testRect.colliderect(consum1.rect):
                         newPart = SnakePart(pg.Rect(body.rect.left, body.rect.top, 25, 25))
                         snake.append(newPart)
                         consum1Position = calculate_pos_consum()
-                        print(consum1Position)
+                    
 
                     """Mirar que no choque consigo mismo. Collidelist devuelve el index del objeto tocado."""
                     if testRect.collidelist(snake) != -1:
@@ -113,7 +138,9 @@ while run:
     """Renderizado donde se dibuja"""
     screen.fill((0, 0, 0))
     count = 0
-    consum1.move_entity(screen, consum1Position, BLUE)
+    for consum in consumables:
+        consum.move_entity(screen, consum.rect, BLUE)
+    
     if canMove:
         for part in snake:
             part.move_entity(screen, prevPositions[count], RED)
