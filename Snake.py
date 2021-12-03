@@ -31,7 +31,7 @@ class Wall(Entity):
 RED = (255, 0, 0)
 GREY = (128, 128, 128)
 BLUE = (0, 0, 255)
-screen = pg.display.set_mode((720, 720))
+screen = pg.display.set_mode((800, 800))
 position = [200, 50]
 amount = 5
 movementDict = {"w": (0, -5), "a": (-5, 0), "s": (0, 5), "d": (5, 0)}
@@ -45,18 +45,14 @@ tail = SnakePart(pg.Rect(position[0] - 100, position[1], 25, 25))
 
 wall1 = Wall(pg.Rect(0, 0, 720, 25))
 wall2 = Wall(pg.Rect(0, 0, 25, 720))
-wall3 = Wall(pg.Rect(500, 500, 720, 25))
-wall4 = Wall(pg.Rect(500, 500, 25, 720))
-'''wall3.rect.width = wall3.rect.width * -1
-wall3.rect.height = wall3.rect.height * -1
-wall4.rect.width = wall4.rect.width * -1
-wall4.rect.height = wall4.rect.height * -1'''
+wall3 = Wall(pg.Rect(0, 720, 720, 25))
+wall4 = Wall(pg.Rect(720, 0, 25, 720))
 walls = [wall1, wall2, wall3, wall4]
 consum1Position = [225, 100]
 consum1 = Consumable(pg.Rect(consum1Position[0], consum1Position[1], 25, 25), 1)
 """Añadir un consumable verde que suba el valor del consumable azul por 2"""
 
-#wall1 = Wall(pg.Rect(0, 0, 25, 25))
+
 
 prevPositions = []
 
@@ -69,11 +65,11 @@ def calculate_pos_consum():
     y = random.randint(-15, 15) * 25
     """se sale algunas veces y por consecuencia aparece demasiado en el borde. Probar las tecnicas de try catch que vienen en las diapos de clase a ver si es mejor."""
     if x < 0:
-        x = 0
+        x = 25
     if x > 720:
         x = 720
     if y < 0:
-        y = 0
+        y = 25
     if y > 720:
         y = 720
     return [x, y]
@@ -99,13 +95,13 @@ while run:
                         consum1Position = calculate_pos_consum()
                         print(consum1Position)
 
-                    snakeAux = snake[:len(snake)]  # todos los elementos menos el último
-                    for part in snakeAux:
-                        """Malo de narices pero no he encontrado forma de chequear si puede hacer un solo heck de 'si hay un objeto x en esta posicion', tengo que hacerlo en un for
-                        y ya que está este aquí obligatorio, al menos aprovecho este en vez de crear otro."""
-                        if testRect.colliderect(part.rect):
+                    """Mirar que no choque consigo mismo. Collidelist devuelve el index del objeto tocado."""
+                    if testRect.collidelist(snake) != -1:
                             canMove = False
                             break
+
+                    snakeAux = snake[:len(snake)]  # todos los elementos menos el último
+                    for part in snakeAux:                                              
                         prevPositions.append([part.rect.left, part.rect.top])
 
             except ValueError:
@@ -125,6 +121,6 @@ while run:
     else:
         for part in snake:
             pg.draw.rect(screen, RED, part.rect)
-    for i in walls:
-        pg.draw.rect(screen, GREY, i.rect)
+    for wall in walls:
+        pg.draw.rect(screen, GREY, wall.rect)
     pg.display.flip()
