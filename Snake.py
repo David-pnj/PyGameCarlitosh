@@ -2,22 +2,28 @@ import sys,random, pygame as pg
 
 pg.init()
 
-"""TO DO: Consumable que aumenta la puntuación de los azules, tener varios azules (opcional) y sprites/sonidos para la serpiente y consumables"""
-class Consumable():
+"""TO DO: Consumable que aumenta la puntuación de los azules, tener varios azules (opcional) y sonidos para la serpiente y consumables"""
+
+class Entity():
+    def __init__(self,rect) -> None:
+        self.rect=rect
+    def move_entity(self,screen,position,color):
+        self.rect=pg.Rect(position[0],position[1],25,25)
+        pg.draw.rect(screen,color,self.rect)
+
+class Consumable(Entity):
     def __init__(self,rect,points):
         self.rect=rect
         self.points=points
-    def move_consumable(self,screen,position):
-        self.rect=pg.Rect(position[0],position[1],25,25)
-        pg.draw.rect(screen,(0,0,255),self.rect)
+    
 
-class SnakePart():
+class SnakePart(Entity):
     def __init__(self,rect):
-        self.rect=rect
-    def move_part(self,screen,position):
-        self.rect=pg.Rect(position[0],position[1],25,25)
-        pg.draw.rect(screen,(255,0,0),self.rect)
-        
+        super().__init__(rect)
+
+class Wall(Entity):
+    def __init__(self,rect):
+        super().__init__(rect)
 
     
 screen = pg.display.set_mode((720,720))
@@ -35,6 +41,8 @@ tail= SnakePart(pg.Rect(position[0]-100,position[1],25,25))
 consum1Position=[225,100]
 consum1=Consumable(pg.Rect(consum1Position[0],consum1Position[1],25,25),1)
 """Añadir un consumable verde que suba el valor del consumable azul por 2"""
+
+wall1=Wall(pg.Rect(0,0,25,25))
 
 prevPositions=[]
 
@@ -92,14 +100,14 @@ while run:
     """Renderizado"""
     screen.fill((0,0,0))
     count = 0
-    consum1.move_consumable(screen,consum1Position)
+    consum1.move_entity(screen,consum1Position,(0,0,255))
     if canMove:        
         for part in snake:
-            part.move_part(screen,prevPositions[count])
+            part.move_entity(screen,prevPositions[count],(255,0,0))
             count+=1                   
     else:
         for part in snake:
             pg.draw.rect(screen,(255,0,0),part.rect)
         
-    
+    pg.draw.rect(screen,(128,128,128),wall1.rect)
     pg.display.flip()
