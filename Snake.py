@@ -25,7 +25,9 @@ class Wall(Entity):
     def __init__(self,rect):
         super().__init__(rect)
 
-    
+RED = (255, 0, 0)
+GREY = (128, 128, 128)
+BLUE = (0, 0, 255)
 screen = pg.display.set_mode((720,720))
 position = [200,50]
 amount = 5
@@ -100,14 +102,14 @@ while run:
     """Renderizado"""
     screen.fill((0,0,0))
     count = 0
-    consum1.move_entity(screen,consum1Position,(0,0,255))
+    consum1.move_entity(screen,consum1Position,BLUE)
     if canMove:        
         for part in snake:
-            part.move_entity(screen,prevPositions[count],(255,0,0))
+            part.move_entity(screen,prevPositions[count],RED)
             count+=1                   
     else:
         for part in snake:
-            pg.draw.rect(screen,(255,0,0),part.rect)
+            pg.draw.rect(screen, RED ,part.rect)
         
-    pg.draw.rect(screen,(128,128,128),wall1.rect)
+    pg.draw.rect(screen,GREY,wall1.rect)
     pg.display.flip()
