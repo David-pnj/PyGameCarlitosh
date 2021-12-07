@@ -12,8 +12,9 @@ amount = 5
 movementDict = {"w": (0, -5), "a": (-5, 0), "s": (0, 5), "d": (5, 0)}
 run = True
 valueMult = 1
+valueTime= 0
 
-"""TO DO: Consumable que aumenta la puntuación de los azules y sonidos para la serpiente y consumables"""
+"""TO DO: sonidos para la serpiente y consumables. Limpiar código"""
 class Entity():
     def __init__(self, rect) -> None:
         self.rect = rect
@@ -43,12 +44,13 @@ class GreenConsumable(Entity):
     def touchEffect(self,list,body): #estos atributos no se usan. Buscar una manera de refactorizar touchEffect para que acepte una cantidad variable de atributos.
         global valueMult
         valueMult+=1
+        global valueTime
+        valueTime = 20
 
 class SnakePart(Entity):
     def __init__(self, rect):
         super().__init__(rect)
     def touchEffect(self):
-        """meter aqui lo de si se toca, no moverse"""
         return super().touchEffect()
 
 class Wall(Entity):
@@ -72,8 +74,6 @@ def calculate_pos_consum():
         y = 720
     return [x, y]
 
-
-'''posicion x, posicion y,anchura, altura'''
 head = SnakePart(pg.Rect(position[0], position[1], 25, 25))
 body = SnakePart(pg.Rect(position[0] - 25, position[1], 25, 25))
 body1 = SnakePart(pg.Rect(position[0] - 50, position[1], 25, 25))
@@ -92,7 +92,6 @@ consum1 = BlueConsumable(pg.Rect(consum1Position[0], consum1Position[1], 25, 25)
 consum2 = BlueConsumable(pg.Rect(consum1Position[0] + 125, consum1Position[1] + 60, 25, 25), BLUE)
 consum3 = GreenConsumable(pg.Rect(consum1Position[0] + 150, consum1Position[1] + 60, 25, 25),GREEN)
 consumables = [consum1, consum2,consum3]
-"""Añadir un consumable verde que suba el valor del consumable azul por 2"""
 
 prevPositions = []
 
@@ -130,30 +129,34 @@ while run:
                     prevPositions.clear()
                     prevPositions.append(position)
                     testRect = pg.Rect(position[0], position[1], 25, 25)
-                    """Si toca un consumable, añade 1 pieza a la serpiente. Cambiarlo para que la cantidad de piezas añadidas dependa del atributo points de la clase Consumable"""
+                    """Si toca un consumable, añade 1 pieza a la serpiente"""
                     collidedConsum = testRect.collidelist(consumables)
                     if collidedConsum != -1:
                         consumables[collidedConsum].touchEffect(snake, body)
                         consum1Position = calculate_pos_consum()
                         consumables[collidedConsum].rect.left = consum1Position[0]  # cambia la pos del consumable tomado
                         consumables[collidedConsum].rect.top = consum1Position[1]
+                    
+                    #tiempo restante del consumable verde
+                    if(valueTime>0):
+                        valueTime-=1
+                    else:
+                        valueMult=1
 
                     """Mirar que no choque consigo mismo. Collidelist devuelve el index del objeto tocado."""
-                    if testRect.collidelist(snake) != -1:
+                    if (testRect.collidelist(walls) != -1) or (testRect.collidelist(snake) != -1):
                         canMove = False
                         break
 
                     snakeAux = snake[:len(snake)]  # todos los elementos menos el último
                     for part in snakeAux:
                         prevPositions.append([part.rect.left, part.rect.top])
-
             except ValueError:
-                print(
-                    'input no valido')  # por ahora esto se queda como try catch para no dar error. hay que incluir soporte para las flechas, que no tienen chr
+                print('input no valido')
     """prevPositions es una lista que guarda la NUEVA posición a la que deberán moverse todas las partes, la cual es la que ocupaba la anterior antes excepto head, que tomará
     de nueva posición el input. Importante separar el obtener las posiciones del renderizado."""
 
-    """Renderizado donde se dibuja"""
+    """Renderizado"""
     screen.fill((0, 0, 0))
     count = 0
     for consum in consumables:
