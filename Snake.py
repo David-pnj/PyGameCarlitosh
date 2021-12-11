@@ -1,20 +1,27 @@
 import sys, random, pygame as pg
 
 pg.init()
+pg.mixer.init()
+pg.mixer.music.load("file_example_OOG_5MG.ogg")
+pg.mixer.music.play()
+pg.mixer.music.set_volume(0.5) #de 0.0 a 1.0
+pg.mixer.music.play(-1) #en blucle -1, solo una vez 1
 
 RED = (255, 0, 0)
 GREY = (128, 128, 128)
 BLUE = (0, 0, 255)
-GREEN = (0,255,0)
-screen = pg.display.set_mode((745, 745)) #(anchura,altura)
+GREEN = (0, 255, 0)
+screen = pg.display.set_mode((745, 745))  # (anchura,altura)
 position = [200, 50]
 amount = 5
 movementDict = {"w": (0, -5), "a": (-5, 0), "s": (0, 5), "d": (5, 0)}
 run = True
 valueMult = 1
-valueTime= 0
+valueTime = 0
 
 """TO DO: sonidos para la serpiente y consumables. Limpiar código"""
+
+
 class Entity():
     def __init__(self, rect) -> None:
         self.rect = rect
@@ -22,7 +29,7 @@ class Entity():
     def move_entity(self, screen, position, color):
         self.rect = pg.Rect(position[0], position[1], 25, 25)
         pg.draw.rect(screen, color, self.rect)
-    
+
     def touchEffect(self):
         raise NotImplementedError("Not implemented")
 
@@ -30,35 +37,44 @@ class Entity():
 class BlueConsumable(Entity):
     def __init__(self, rect, color):
         super().__init__(rect)
-        self.color=color
-    def touchEffect(self,list,body):
+        self.color = color
+
+    def touchEffect(self, list, body):
         global valueMult
-        for i in range(0,valueMult):
+        for i in range(0, valueMult):
             newPart = SnakePart(pg.Rect(body.rect.left, body.rect.top, 25, 25))
             list.append(newPart)
 
+
 class GreenConsumable(Entity):
-    def __init__(self, rect,color):
+    def __init__(self, rect, color):
         super().__init__(rect)
-        self.color=color
-    def touchEffect(self,list,body): #estos atributos no se usan. Buscar una manera de refactorizar touchEffect para que acepte una cantidad variable de atributos.
+        self.color = color
+
+    def touchEffect(self, list,
+                    body):  # estos atributos no se usan. Buscar una manera de refactorizar touchEffect para que acepte una cantidad variable de atributos.
         global valueMult
-        valueMult+=1
+        valueMult += 1
         global valueTime
         valueTime = 20
+
 
 class SnakePart(Entity):
     def __init__(self, rect):
         super().__init__(rect)
+
     def touchEffect(self):
         return super().touchEffect()
+
 
 class Wall(Entity):
     def __init__(self, rect):
         super().__init__(rect)
+
     def touchEffect(self):
         """meter aqui lo de si se toca, no moverse"""
         return super().touchEffect()
+
 
 def calculate_pos_consum():
     x = random.randint(-15, 15) * 25
@@ -74,6 +90,7 @@ def calculate_pos_consum():
         y = 720
     return [x, y]
 
+
 head = SnakePart(pg.Rect(position[0], position[1], 25, 25))
 body = SnakePart(pg.Rect(position[0] - 25, position[1], 25, 25))
 body1 = SnakePart(pg.Rect(position[0] - 50, position[1], 25, 25))
@@ -86,12 +103,11 @@ wall3 = Wall(pg.Rect(0, 700, 720, 25))
 wall4 = Wall(pg.Rect(720, 0, 25, 720))
 walls = [wall1, wall2, wall3, wall4]
 
-
 consum1Position = [225, 100]
 consum1 = BlueConsumable(pg.Rect(consum1Position[0], consum1Position[1], 25, 25), BLUE)
 consum2 = BlueConsumable(pg.Rect(consum1Position[0] + 125, consum1Position[1] + 60, 25, 25), BLUE)
-consum3 = GreenConsumable(pg.Rect(consum1Position[0] + 150, consum1Position[1] + 60, 25, 25),GREEN)
-consumables = [consum1, consum2,consum3]
+consum3 = GreenConsumable(pg.Rect(consum1Position[0] + 150, consum1Position[1] + 60, 25, 25), GREEN)
+consumables = [consum1, consum2, consum3]
 
 prevPositions = []
 
@@ -134,14 +150,15 @@ while run:
                     if collidedConsum != -1:
                         consumables[collidedConsum].touchEffect(snake, body)
                         consum1Position = calculate_pos_consum()
-                        consumables[collidedConsum].rect.left = consum1Position[0]  # cambia la pos del consumable tomado
+                        consumables[collidedConsum].rect.left = consum1Position[
+                            0]  # cambia la pos del consumable tomado
                         consumables[collidedConsum].rect.top = consum1Position[1]
-                    
-                    #tiempo restante del consumable verde
-                    if(valueTime>0):
-                        valueTime-=1
+
+                    # tiempo restante del consumable verde
+                    if (valueTime > 0):
+                        valueTime -= 1
                     else:
-                        valueMult=1
+                        valueMult = 1
 
                     """Mirar que no choque consigo mismo. Collidelist devuelve el index del objeto tocado."""
                     if (testRect.collidelist(walls) != -1) or (testRect.collidelist(snake) != -1):
